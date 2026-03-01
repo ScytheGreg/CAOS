@@ -1,0 +1,39 @@
+#!/bin/bash
+# This program prints all executable files from directories given
+# as parameters. In case of no parameters, sets current directory
+# as the first one
+# Usage: 74 [directory..]	show executable files form directory(ies)
+#    or: 74 --help              show manual
+if [[ ! -n "$1" ]] # No parameters case
+then
+	set -- "." # Resets parametes. Set only one as current directory.
+fi
+for dir # for every parameter (directory)
+do 
+	if [[ -d "$dir" &&  -n $(ls -A "$dir") ]] # Check if parameter is a non empty directory
+	then
+		exec_cnt=0 # Conuter of executable files
+		for path in "$dir"/*
+		do	
+			if [[ ! -d "$path" && -x "$path" ]] # Chceck if path is not a directory and is executable
+			then
+				if ((exec_cnt == 0)) # If no executable file earlier
+				then	
+					echo "Executable files in  $dir directory:"
+				fi
+				((exec_cnt++))
+				name=$(basename "$path")
+				echo $name
+			fi
+		done
+		if ((exec_cnt == 0)) # If no exectuable files
+		then
+			echo "No executable file found in $dir"
+		fi
+	elif [[ ! -d $dir ]] # Parameter is not a directory
+	then
+		echo "$dir is not a directory"
+	else # Directory is empty
+		echo "$dir directory is empty"
+	fi
+done
