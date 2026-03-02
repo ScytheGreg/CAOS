@@ -3,7 +3,7 @@
 # as parameters. In case of no parameters, sets current directory
 # as the first one
 # Usage: 74 [directory..]	show executable files form directory(ies)
-#    or: 74 --help              show manual
+
 if [[ ! -n "$1" ]] # No parameters case
 then
 	set -- "." # Resets parametes. Set only one as current directory.
