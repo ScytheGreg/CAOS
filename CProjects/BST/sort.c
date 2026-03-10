@@ -1,6 +1,6 @@
+#include <assert.h>
 #include <stdio.h>
-#include  <stdlib.h>
-#include  <assert.h>
+#include <stdlib.h>
 
 typedef struct Node* Tree;
 struct Node {
@@ -9,75 +9,89 @@ struct Node {
     Tree right;
 };
 
-void insert(Tree *treePtr, int x) {
-    if ((*treePtr) == NULL) {
-        (*treePtr) = (Tree) malloc(sizeof(struct Node));
-        assert((*treePtr) != NULL);
-        (*treePtr) -> value = x;
-        (*treePtr) -> left = NULL;
-        (*treePtr) -> right = NULL;
+
+void setRight(Tree *treePtr, Tree child) {
+    assert(treePtr && *treePtr);
+    (*treePtr) -> right = child;
+}
+
+void setLeft(Tree *treePtr, Tree child) {
+    assert(treePtr && *treePtr);
+    (*treePtr) -> left = child;
+}
+
+void setValue(Tree *treePtr, int value) {
+    assert(treePtr && *treePtr);
+    (*treePtr) -> value = value;
+}
+
+int getValue(Tree *treePtr) {
+    assert(treePtr && *treePtr);
+    return (*treePtr) -> value;
+}
+
+Tree *getRight(Tree *treePtr) {
+    assert(treePtr && *treePtr);
+    return &((*treePtr) -> right);
+}
+
+Tree *getLeft(Tree *treePtr) {
+    assert(treePtr && *treePtr);
+    return &((*treePtr) -> left);
+}
+
+void allocNode(Tree* treePtr, int value) {
+    assert(!*treePtr);
+    Tree t = (Tree) malloc(sizeof(struct Node));
+    assert(t);
+    *treePtr = t;
+    setValue(treePtr, value);
+    setLeft(treePtr, NULL);
+    setRight(treePtr, NULL);
+}
+
+void insert(Tree* treePtr, int value) {
+    Tree branch = *treePtr;
+    Tree *brPtr = &branch;
+    while (branch) {
+        if (getValue(brPtr) > value)
+            brPtr = getLeft(brPtr);
+        else if (getValue(brPtr) < value)
+            brPtr = getRight(brPtr);
+        else return;
     }
-    else {
-        if ((*treePtr) -> value > x) {
-            insert(&((*treePtr)->left), x);
-        }
-        else if ((*treePtr) -> value < x) {
-            insert(&((*treePtr)->right), x);
-        }
+    allocNode(brPtr, value);
+}
+
+void printAll(Tree *treePtr) {
+    if (treePtr && *treePtr) {
+        printAll(getLeft(treePtr));
+        printf("Node_value: %d\n", getValue(treePtr));
+        printAll(getRight(treePtr));
     }
 }
 
-void printAll(Tree t) {
-    if (t == NULL)
-        return;
-    printAll(t->left);
-    printf("Node_value: %d\n", t->value);
-    printAll(t->right);
-}
-
-void removeAll(Tree t) {
-    if (t == NULL)
-        return;
-    removeAll(t->left);
-    removeAll(t->right);
-    free(t);
-}
-
-int removeMinRec(Tree *treePtr, Tree *parent) {
-    assert((*treePtr) != NULL);
-    Tree *left = &((*treePtr)->left);
-    if (*left != NULL) {
-        return removeMinRec(left, treePtr);
-    }
-    else {
-        int result = (*treePtr)->value;
-        Tree *right = &((*treePtr)->right);
-        if (*right != NULL && parent != NULL) {
-            (*parent)->left = *right;
-        }
-        else if (parent != NULL) {
-            (*parent) -> left = NULL;
-        }
+void removeAll(Tree* treePtr) {
+    if (treePtr && *treePtr) {
+        removeAll(getRight(treePtr));
+        removeAll(getLeft(treePtr));
         free(*treePtr);
-        return result;
     }
 }
-
-int removeMin(Tree *treePtr) {
-    return removeMinRec(treePtr, NULL);
-}
-
 
 int main() {
     int n;
     scanf("%d", &n);
-    Tree treePtr = NULL;
+    Tree tree = NULL;
+    Tree *treePtr = &tree;
     for (int i = 0; i < n; i++) {
         int x;
         scanf("%d", &x);
-        insert(&treePtr, x);
+        if (x > 0)
+            insert(treePtr, x);
+        //if (x < 0)
+            //removeValue(&treePtr, -1 * x);
     }
-    printf("Deleted: %d\n",removeMin(&treePtr));
     printAll(treePtr);
     removeAll(treePtr);
     return 0;
