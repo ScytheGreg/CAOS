@@ -9,7 +9,6 @@ struct Node {
     Tree right;
 };
 
-
 void setRight_(const Tree *treePtr, Tree child) {
     assert(treePtr && *treePtr);
     (*treePtr) -> right = child;
@@ -78,11 +77,10 @@ Tree *nextBranch(const Tree *treePtr, int value) {
     return getRight(treePtr);
 }
 
-void insert(const Tree* treePtr, int value) {
+void insert(Tree* treePtr, int value) {
     assert(treePtr);
-    Tree branch = *treePtr;
-    Tree *brPtr = &branch;
-    while (branch) {
+    Tree *brPtr = treePtr;
+    while (*brPtr) {
         if (getValue(brPtr) == value)
             return;
         brPtr = nextBranch(brPtr, value);
@@ -97,8 +95,6 @@ void printAll(const Tree *treePtr) {
         printAll(getRight(treePtr));
     }
 }
-
-void deleteNode(const Tree* treePtr) { }
 
 void removeAll(const Tree* treePtr) {
     if (treePtr && *treePtr) {
@@ -119,37 +115,58 @@ void changeRoot(Tree *treePtr, Tree* newRoot) {
     }
 }
 
-int removeMin(Tree *treePtr) {
-    assert(treePtr && *treePtr);
-    int result = getValue(treePtr);
-    if (!getLeft(treePtr)) {
-        changeRoot(treePtr, getRight(treePtr));
-    }
-    else {
-        Tree branch = *treePtr;
-        Tree *brPtr = &branch;
-        while (getLeft(getLeft(brPtr))) {
+Tree *findMin(Tree* treePtr) {
+    if (treePtr && *treePtr) {
+        Tree *brPtr = treePtr;
+        while (getLeft(brPtr) && *getLeft(brPtr)) {
             brPtr = getLeft(brPtr);
         }
-        setLeft(brPtr, getLeft(getRight(brPtr)));
+        return brPtr;
     }
-    free(*treePtr);
+    return NULL;
+}
+
+Tree *findValue(Tree* treePtr, int value) {
+    if (treePtr && *treePtr) {
+        Tree *brPtr = treePtr;
+        while (brPtr && *brPtr && getValue(brPtr) != value)
+            brPtr = nextBranch(brPtr, value);
+        if (brPtr && *brPtr && getValue(brPtr) == value)
+            return brPtr;
+    }
+    return NULL;
+}
+
+void removeRoot(Tree* treePtr) {
+    if (treePtr && *treePtr) {
+        Tree deleteThis = *treePtr;
+        if (!getRight(treePtr)) {
+            changeRoot(treePtr, getLeft(treePtr));
+        }
+        else {
+            changeRoot(treePtr, getRight(treePtr));
+            Tree *rightMin = findMin(getRight(treePtr));
+            setLeft(rightMin, getLeft(treePtr));
+        }
+        free(deleteThis);
+    }
+}
+
+int removeMin(Tree *treePtr) {
+    assert (treePtr && *treePtr);
+    Tree* minPtr = findMin(treePtr);
+    assert (minPtr && *minPtr);
+    int result = getValue(minPtr);
+    removeRoot(minPtr);
     return result;
 }
 
-// To be written
 void removeValue(Tree* treePtr, int value) {
     if (treePtr && *treePtr) {
-
-        if (!getRight(treePtr))
-            changeRoot(treePtr, getLeft(treePtr));
-        else {
-            Tree *brPtr = getRight(treePtr); // Take the smallest value from right subforest
-            while (getLeft(brPtr)) {
-                brPtr = getLeft(brPtr);
-            }
+        Tree *valuePtr = findValue(treePtr, value);
+        if (valuePtr && *valuePtr) {
+            removeRoot(valuePtr);
         }
-
     }
 }
 
@@ -163,9 +180,10 @@ int main() {
         scanf("%d", &x);
         if (x > 0)
             insert(treePtr, x);
-        //if (x < 0)
-            //removeValue(&treePtr, -1 * x);
+        if (x < 0)
+            removeValue(treePtr, -1 * x);
     }
+    removeMin(treePtr);
     printAll(treePtr);
     removeAll(treePtr);
     return 0;
