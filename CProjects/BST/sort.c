@@ -91,7 +91,7 @@ void insert(Tree* treePtr, int value) {
 void printAll(const Tree *treePtr) {
     if (treePtr && *treePtr) {
         printAll(getLeft(treePtr));
-        printf("Node_value: %d\n", getValue(treePtr));
+        printf("%d\n", getValue(treePtr));
         printAll(getRight(treePtr));
     }
 }
@@ -140,13 +140,13 @@ Tree *findValue(Tree* treePtr, int value) {
 void removeRoot(Tree* treePtr) {
     if (treePtr && *treePtr) {
         Tree deleteThis = *treePtr;
-        if (!getRight(treePtr)) {
+        if (!getRight(treePtr) || !*getRight(treePtr)) {
             changeRoot(treePtr, getLeft(treePtr));
         }
         else {
-            changeRoot(treePtr, getRight(treePtr));
             Tree *rightMin = findMin(getRight(treePtr));
             setLeft(rightMin, getLeft(treePtr));
+            changeRoot(treePtr, getRight(treePtr));
         }
         free(deleteThis);
     }
@@ -170,20 +170,26 @@ void removeValue(Tree* treePtr, int value) {
     }
 }
 
-int main() {
+int readInt() {
     int n;
-    scanf("%d", &n);
+    if (scanf("%d", &n) != 1) {
+        printf("Error reading number\n");
+        exit(1);
+    }
+    return n;
+}
+
+int main() {
+    int n = readInt();
     Tree tree = NULL;
     Tree *treePtr = &tree;
     for (int i = 0; i < n; i++) {
-        int x;
-        scanf("%d", &x);
+        int x = readInt();
         if (x > 0)
             insert(treePtr, x);
         if (x < 0)
             removeValue(treePtr, -1 * x);
     }
-    removeMin(treePtr);
     printAll(treePtr);
     removeAll(treePtr);
     return 0;
